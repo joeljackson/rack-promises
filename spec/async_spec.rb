@@ -1,3 +1,4 @@
+require "em-promise"
 require "#{File.dirname(__FILE__)}/../lib/rack/promises"
 require "#{File.dirname(__FILE__)}/../lib/rack/promises/no_promise_call_error"
 
@@ -19,5 +20,13 @@ describe Rack::Promises do
     -> {
       instance.call({})
     }.should raise_error NoPromiseCallError
+  end
+
+  it "should return watever value it's given if the result is not a promise" do
+    SomeRackClass.send(:define_method, :pcall) do |env|
+      [200, {}, "Hello world"]
+    end
+    instance = SomeRackClass.new
+    instance.call({}).should == [200, {}, "Hello world"]
   end
 end
