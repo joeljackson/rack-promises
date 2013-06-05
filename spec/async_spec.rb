@@ -17,9 +17,9 @@ describe Rack::Promises do
 
   it "should raise an exception if call is called and pcall is not defined" do
     instance = SomeRackClass.new
-    -> {
+    expect(-> {
       instance.call({})
-    }.should raise_error NoPromiseCallError
+    }).to raise_error NoPromiseCallError
   end
 
   it "should return watever value it's given if the result is not a promise" do
@@ -28,5 +28,23 @@ describe Rack::Promises do
     end
     instance = SomeRackClass.new
     instance.call({}).should == [200, {}, "Hello world"]
+  end
+  
+  it "should throw async if a promise is returned" do
+    #Weird hacky way to test for throw. Anyone got anything better?
+    test = 0
+    SomeRackClass.send(:define_method, :pcall) do |env|
+      EventMachine::Q.defer.promise
+    end
+    instance = SomeRackClass.new
+    catch(:async) do
+      test = 1
+    end
+    instance.call({}) unless test = 1
+    test.should == 1
+  end
+
+  it "should fulfill the promise with the rack async callback" do
+    pending
   end
 end
