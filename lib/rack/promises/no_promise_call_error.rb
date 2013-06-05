@@ -1,0 +1,2 @@
+class NoPromiseCallError < StandardError
+end
