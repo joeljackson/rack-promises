@@ -31,17 +31,13 @@ describe Rack::Promises do
   end
   
   it "should throw async if a promise is returned" do
-    #Weird hacky way to test for throw. Anyone got anything better?
-    test = 0
     SomeRackClass.send(:define_method, :pcall) do |env|
       EventMachine::Q.defer.promise
     end
     instance = SomeRackClass.new
-    catch(:async) do
-      test = 1
-    end
-    instance.call({}) unless test = 1
-    test.should == 1
+    expect( -> {
+              instance.call({})
+            }).to throw_symbol(:async)
   end
 
   it "should fulfill the promise with the rack async callback" do
