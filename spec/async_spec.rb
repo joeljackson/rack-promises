@@ -1,4 +1,5 @@
 require "em-promise"
+require "eventmachine"
 require "#{File.dirname(__FILE__)}/../lib/rack/promises"
 require "#{File.dirname(__FILE__)}/../lib/rack/promises/no_promise_call_error"
 
@@ -41,6 +42,30 @@ describe Rack::Promises do
   end
 
   it "should fulfill the promise with the rack async callback" do
-    pending
+    #This is kind of weird and barftastic. Not sure how to make it better?
+    #When refactorme.com is done I'll find out there!! :-)
+    some_value = 0
+    Thread.new do
+      EM.run
+    end
+
+    SomeRackClass.send(:define_method, :pcall) do |env|
+      deferred = EM::Q.defer
+      EM::Timer.new(0.1) do 
+        deferred.resolve([200, {}, "Hello world"])
+      end
+      deferred.promise
+    end
+
+    instance = SomeRackClass.new
+    catch(:async) do
+      instance.call({'async.callback' => lambda { |result|
+                        some_value = 1
+                      }})
+    end
+    while some_value == 0
+      sleep 0.1
+    end
+    some_value.should == 1
   end
 end
