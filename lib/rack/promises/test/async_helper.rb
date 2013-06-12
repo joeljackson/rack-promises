@@ -48,7 +48,7 @@ module Rack::Promises
   module Methods
     include Rack::Test::Methods
     def build_rack_mock_session # XXX move me
-      MatchMaker::Test::AsyncSession.new(app)
+      Rack::Promises::AsyncSession.new(app)
     end
   end
 end

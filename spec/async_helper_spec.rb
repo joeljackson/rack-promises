@@ -13,6 +13,14 @@ end
 describe Rack::Promises::AsyncSession do
   it "should not interfere with normal gets" do
     get "/"
-    last_response.should_be ok
+    last_response.should be_ok
+  end
+
+  it "should work with async requests" do
+    pending
+  end
+
+  it "should handle exceptions in async requests" do
+    pending
   end
 end
